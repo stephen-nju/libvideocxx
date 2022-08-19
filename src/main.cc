@@ -13,5 +13,8 @@ int main(int argc, char** argv) {
         return -1;
     }
     int fps = video_capture.get(cv::CAP_PROP_FPS);
-    printf("video fps =%d", fps);
+
+
+
+
 }

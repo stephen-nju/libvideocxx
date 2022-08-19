@@ -25,14 +25,14 @@ option(ENABLE_TESTING "Enable Test Builds" OFF)
 
 # Very basic PCH example
 
-add_subdirectory(spdlog)
+add_subdirectory(3rdparty)
 if(ENABLE_TESTING)
   enable_testing()
   message("Building Tests.")
   add_subdirectory(test)
 endif()
 
-find_package(Opencv REQUIRED)
+find_package(OpenCV REQUIRED)
 if(${OpenCV_FOUND})
   message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
 endif()
