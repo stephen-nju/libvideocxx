@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "cstdio": "cpp"
+        "cstdio": "cpp",
+        "chrono": "cpp",
+        "fstream": "cpp",
+        "iosfwd": "cpp",
+        "xstring": "cpp",
+        "filesystem": "cpp"
     }
 }

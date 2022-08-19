@@ -33,6 +33,8 @@ if(ENABLE_TESTING)
 endif()
 
 find_package(OpenCV REQUIRED)
+
+
 if(${OpenCV_FOUND})
   message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
 endif()
