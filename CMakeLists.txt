@@ -6,17 +6,23 @@ project(videoprcess CXX)
 include(cmake/Common.cmake)
 include(cmake/BuildLocation.cmake)
 include(cmake/StandardProjectSettings.cmake)
+
 # enable cache system
 include(cmake/Cache.cmake)
+
 # Add linker configuration
 include(cmake/Linker.cmake)
+
 # standard compiler warnings
 include(cmake/CompilerWarnings.cmake)
+
 # sanitizer options if supported by compiler
 include(cmake/Sanitizers.cmake)
 enable_sanitizers(${PROJECT_NAME})
+
 # enable doxygen
 include(cmake/Doxygen.cmake)
+
 # allow for static analysis options
 include(cmake/StaticAnalyzers.cmake)
 
@@ -24,8 +30,8 @@ option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(ENABLE_TESTING "Enable Test Builds" OFF)
 
 # Very basic PCH example
-
 add_subdirectory(3rdparty)
+
 if(ENABLE_TESTING)
   enable_testing()
   message("Building Tests.")
@@ -34,15 +40,21 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
-
 if(${OpenCV_FOUND})
-  message(STATUS "OpenCV_VERSION: ${OpenCV_VERSION}")
+  message(STATUS "OpenCV_FOUND: ${OpenCV_FOUND}")
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(FFmpeg REQUIRED)
+
+if(${FFmpeg_FOUND})
+  message(STATUS "FFmpeg_FOUND :${FFMPEG_FOUND}")
+endif()
 
 add_subdirectory(src)
 
 option(ENABLE_UNITY "Enable Unity builds of projects" OFF)
+
 if(ENABLE_UNITY)
   # Add for any project you want to apply unity builds for
   set_target_properties(intro PROPERTIES UNITY_BUILD ON)
