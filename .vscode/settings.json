@@ -5,6 +5,12 @@
         "fstream": "cpp",
         "iosfwd": "cpp",
         "xstring": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "functional": "cpp",
+        "memory": "cpp",
+        "thread": "cpp",
+        "xlocale": "cpp",
+        "charconv": "cpp",
+        "xmemory": "cpp"
     }
 }
