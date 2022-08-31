@@ -12,6 +12,7 @@
         "xlocale": "cpp",
         "charconv": "cpp",
         "xmemory": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "vector": "cpp"
     }
 }
