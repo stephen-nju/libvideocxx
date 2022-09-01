@@ -1,0 +1,4 @@
+#ifndef SRC_FFMPEG_STREAM_WRITER_H_
+#define SRC_FFMPEG_STREAM_WRITER_H_
+
+#endif

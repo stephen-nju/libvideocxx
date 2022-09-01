@@ -1,1 +1,4 @@
 
+#ifndef SRC_FMMPEG_STREAM_READER_H_
+#define SRC_FMMPEG_STREAM_READER_H_
+#endif

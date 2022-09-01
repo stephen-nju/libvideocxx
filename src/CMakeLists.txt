@@ -1,6 +1,8 @@
 
 
-add_executable(main demo.cc)
+add_subdirectory(ffmpeg)
+
+add_executable(main main.cc)
 set_target_properties(main PROPERTIES CXX_STANDARD 17
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO)
