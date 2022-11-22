@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
             while (true) {
                 bool success = video_capture.read(frame);
                 if (!success) {
-                    spdlog::error("read vide error");
+                    spdlog::error("read video error");
                     break;
                 }
                 output_video.write(frame);
