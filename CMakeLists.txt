@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.16)
 
 # Set the project name to your project name, my project isn't very descriptive
 project(videoprcess CXX)
