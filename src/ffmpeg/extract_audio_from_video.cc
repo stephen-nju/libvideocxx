@@ -22,7 +22,7 @@ extern "C" {
 
 int main(int argc, const char* argv[]) {
 
-    cxxopts::Options options("libvideo", "video proecessing arguement");
+    cxxopts::Options options("libvideo", "extract video audio");
     options.add_options()("f,file", "file name", cxxopts::value<std::string>());
 
     auto opt         = options.parse(argc, argv);
@@ -89,57 +89,16 @@ int main(int argc, const char* argv[]) {
                          p_avcodec_param_video->sample_rate);
         }
     }
-
-    // 从流中获取视频的编解码器上下文
-    // 利用编解码器获取编解码器的上下文，为其分配内存
-    AVCodecContext* p_codec_context_video = avcodec_alloc_context3(p_avcodec_video);
-    if (!p_codec_context_video) {
-        spdlog::info("failed to allocated memory for AVCodecContext");
+    AVFormatContext* p_output_format_ctx = avformat_alloc_context();
+    if (!p_output_format_ctx) {
+        spdlog::info("ERROR could not allocate memory for output Format Context");
         return -1;
     }
-    // 使用编解码器参数初始化上下文
-    if (avcodec_parameters_to_context(p_codec_context_video, p_avcodec_param_video) < 0) {
-        spdlog::info("failed to copy codec params to codec context");
-        return -1;
-    }
+    AVOutputFormat* p_output_format = av_guess_format("wav",NULL,NULL);
+    p_output_format->audio_codec=AV_CODEC_ID_WAVPACK
 
-    // 打开编解码器，初始化编解码器的上下文
-    if (avcodec_open2(p_codec_context_video, p_avcodec_video, NULL) < 0) {
-        spdlog::info("failed initial codec context using avcode_open2");
-    };
-   
-    // p指的是point
-    AVFrame* p_frame = av_frame_alloc();
-    if (p_frame == nullptr) {
-        spdlog::info("alloc frame memory failed");
-    }
 
-    // 通过读取包来读取整个视频流，然后把它解码成帧，最后转换格式并且保存。
-    AVPacket* p_packet = av_packet_alloc();
-    if (p_packet == nullptr) {
-        spdlog::info("alloc packet memory failed");
-    }
-    int response = 0;
-    while (av_read_frame(p_format_context, p_packet) >= 0) {
-        if (p_packet->stream_index == video_stream_index) {
-            //  Supply raw packet data as input to a decoder向视频解码器发送packet
-            int response = avcodec_send_packet(p_codec_context_video, p_packet);
-            if (response < 0) {
-                spdlog::info("avcodec send packet error");
-                return response;
-            }
 
-            while (response >= 0) {
-                response = avcodec_receive_frame(p_codec_context_video, p_frame);
-
-                if (response < 0) {
-                    spdlog::info("avcodec receive frame error");
-                    return response;
-                }
-                spdlog::info("Frame {},{}", p_codec_context_video->frame_number, p_frame->format);
-            }
-        }
-    }
 
     return 0;
 }
