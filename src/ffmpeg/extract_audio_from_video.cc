@@ -54,8 +54,8 @@ int main(int argc, const char* argv[]) {
     int video_stream_index, audio_stream_index;
     // AVCodecContext* p_avcodec_contex;
     // 编解码器上下文
-    const AVCodec* p_avcodec_video           = nullptr;
-    AVCodecParameters* p_avcodec_param_video = nullptr;
+    const AVCodec* p_avcodec_input           = nullptr;
+    AVCodecParameters* p_avcodec_param_input = nullptr;
     // 编解码器参数信息
     for (int i = 0; i < p_format_context->nb_streams; i++) {
         spdlog::info("AVStream duration {} ", p_format_context->streams[i]->duration);
@@ -63,39 +63,104 @@ int main(int argc, const char* argv[]) {
                      p_format_context->streams[i]->r_frame_rate.num,
                      p_format_context->streams[i]->r_frame_rate.den);
 
-        AVCodecParameters* p_local_avcodec_param = NULL;
-        p_local_avcodec_param                    = p_format_context->streams[i]->codecpar;
+        AVCodecParameters* p_avcodec_param_decoder = NULL;
+        p_avcodec_param_decoder                    = p_format_context->streams[i]->codecpar;
         // 找到注册的编解码器
         // 找到视频编码器信息
-        const AVCodec* p_local_avcodec = avcodec_find_decoder(p_local_avcodec_param->codec_id);
-        if (p_local_avcodec == nullptr) {
+        const AVCodec* p_avcodec_decoder = avcodec_find_decoder(p_avcodec_param_decoder->codec_id);
+        if (p_avcodec_decoder == nullptr) {
             spdlog::info("unsupported codec!");
             continue;
         }
         // 寻找视频流和语音流的index
-        if (p_local_avcodec_param->codec_type == AVMEDIA_TYPE_VIDEO) {
-            video_stream_index    = i;
-            p_avcodec_video       = p_local_avcodec;
-            p_avcodec_param_video = p_local_avcodec_param;
+        if (p_avcodec_param_decoder->codec_type == AVMEDIA_TYPE_VIDEO) {
+            video_stream_index = i;
             // 获取视频流的信息
 
             spdlog::info("Video Codec: resolution {}x{}  ",
-                         p_avcodec_param_video->width,
-                         p_avcodec_param_video->height);
-        } else if (p_local_avcodec_param->codec_type == AVMEDIA_TYPE_AUDIO) {
+                         p_avcodec_param_decoder->width,
+                         p_avcodec_param_decoder->height);
+        } else if (p_avcodec_param_decoder->codec_type == AVMEDIA_TYPE_AUDIO) {
             audio_stream_index = i;
             spdlog::info("Audio Codec:{} channels, sample rate {}",
-                         p_avcodec_param_video->channels,
-                         p_avcodec_param_video->sample_rate);
+                         p_avcodec_param_decoder->channels,
+                         p_avcodec_param_decoder->sample_rate);
         }
     }
-    AVFormatContext* p_output_format_ctx = avformat_alloc_context();
-    if (!p_output_format_ctx) {
-        spdlog::info("ERROR could not allocate memory for output Format Context");
+
+    // 从流中获取视频的编解码器上下文
+    // 利用编解码器获取编解码器的上下文，为其分配内存
+    AVCodecContext* p_codec_context_input = avcodec_alloc_context3(p_avcodec_input);
+    if (!p_codec_context_input) {
+        spdlog::info("failed to allocated memory for AVCodecContext");
         return -1;
     }
-    AVOutputFormat* p_output_format = av_guess_format("wav",NULL,NULL);
-    p_output_format->audio_codec=AV_CODEC_ID_WAVPACK
+    // 使用编解码器参数初始化上下文
+    if (avcodec_parameters_to_context(p_codec_context_input, p_avcodec_param_input) < 0) {
+        spdlog::info("failed to copy codec params to codec context");
+        return -1;
+    }
+
+    // 打开编解码器，初始化编解码器的上下文
+    if (avcodec_open2(p_codec_context_input, p_avcodec_input, NULL) < 0) {
+        spdlog::info("failed initial codec context using avcode_open2");
+    };
+    // 输出封装格式上下文
+    // char outputfile[]                      = "demo.wav";
+    // AVFormatContext* output_format_context = nullptr;
+
+    // if (avformat_alloc_output_context2(&output_format_context, NULL, NULL, outputfile) < 0) {
+    //     spdlog::error("alloc output context error");
+    //     return -1;
+    // };
+    // if (!output_format_context) {
+    //     spdlog::error("alloc output format contex error");
+    //     return -1;
+    // }
+    // AVStream* audio_stream = nullptr;
+    // audio_stream           = avformat_new_stream(output_format_context, NULL);
+    // if (!audio_stream) {
+    //     spdlog::error("Failed allocating output stream");
+    //     return -1;
+    // }
+    // // 获取编码器
+    // AVCodec* output_encode               = avcodec_find_encoder(AV_CODEC_ID_AAC);
+    // AVCodecContext* output_codec_context = nullptr;
+    // // 构建输出的编码器的上下文
+    // we can copy the streams, packet by packet, from our input to our output streams
+
+    //读取视频文件
+    AVFrame* p_frame = av_frame_alloc();
+    if (p_frame == nullptr) {
+        spdlog::info("alloc frame memory failed");
+    }
+
+    // 通过读取包来读取整个视频流，然后把它解码成帧，最后转换格式并且保存。
+    AVPacket* p_packet = av_packet_alloc();
+    if (p_packet == nullptr) {
+        spdlog::info("alloc packet memory failed");
+    }
+    int response = 0;
+    while (av_read_frame(p_format_context, p_packet) >= 0) {
+        if (p_packet->stream_index == audio_stream_index) {
+
+            // //  Supply raw packet data as input to a decoder向视频解码器发送packet
+            // int response = avcodec_send_packet(p_codec_context_input, p_packet);
+            // if (response < 0) {
+            //     spdlog::info("avcodec send packet error");
+            //     return response;
+            // }
+
+            // while (response >= 0) {
+            //     response = avcodec_receive_frame(p_codec_context_input, p_frame);
+
+            //     if (response < 0) {
+            //         spdlog::info("avcodec receive frame error");
+            //         return response;
+            //     }
+            // }
+        }
+    }
 
 
 

@@ -107,7 +107,7 @@ int main(int argc, const char* argv[]) {
     if (avcodec_open2(p_codec_context_video, p_avcodec_video, NULL) < 0) {
         spdlog::info("failed initial codec context using avcode_open2");
     };
-   
+
     // p指的是point
     AVFrame* p_frame = av_frame_alloc();
     if (p_frame == nullptr) {
